@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employee Attendance System</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-image: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1950&q=80');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      color: #333;
+    }
+
+    nav {
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 15px 20px;
+      color: white;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    input {
+      padding: 10px;
+      width: calc(33% - 20px);
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #219150;
+    }
+
+    .clear-btn {
+      background-color: #e74c3c;
+    }
+
+    .clear-btn:hover {
+      background-color: #c0392b;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 14px;
+      border: 1px solid #ddd;
+      text-align: center;
+      background-color: #fefefe;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+
+    .timeout-btn {
+      background-color: #f39c12;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .timeout-btn:hover {
+      background-color: #d68910;
+    }
+
+    .summary {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <nav>Employee Attendance Portal</nav>
+
+  <div class="container">
+    <h1>Mark Your Attendance</h1>
+    <form id="attendance-form">
+      <input type="text" id="fname" placeholder="First Name" required>
+      <input type="text" id="lname" placeholder="Last Name" required>
+      <input type="email" id="email" placeholder="Email ID" required>
+      <button type="submit">Mark Attendance</button>
+      <button type="button" class="clear-btn" onclick="clearAll()">Clear All Records</button>
+    </form>
+
+    <h2>Attendance Records</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Date</th>
+          <th>Time In</th>
+          <th>Time Out</th>
+          <th>Hours Worked</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="records-body"></tbody>
+    </table>
+
+    
+  </div>
+
+  <script>
+    const form = document.getElementById('attendance-form');
+    const tbody = document.getElementById('records-body');
+    const totalHoursElem = document.getElementById('total-hours');
+
+    let attendance = JSON.parse(localStorage.getItem('attendance')) || [];
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const fname = document.getElementById('fname').value.trim();
+      const lname = document.getElementById('lname').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const now = new Date();
+
+      const alreadyCheckedIn = attendance.some(rec => rec.email === email && rec.date === now.toLocaleDateString() && rec.timeOut === null);
+      if (alreadyCheckedIn) {
+        alert("You already marked attendance and haven't marked Time Out yet for today!");
+        return;
+      }
+
+      const record = {
+        fname,
+        lname,
+        email,
+        date: now.toLocaleDateString(),
+        timeIn: now.toLocaleTimeString(),
+        timeOut: null,
+        hoursWorked: null
+      };
+
+      attendance.push(record);
+      localStorage.setItem('attendance', JSON.stringify(attendance));
+      form.reset();
+      renderTable();
+    });
+
+    function renderTable() {
+      tbody.innerHTML = '';
+      let totalWorked = 0;
+
+      attendance.forEach((rec, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${rec.fname} ${rec.lname}</td>
+          <td>${rec.email}</td>
+          <td>${rec.date}</td>
+          <td>${rec.timeIn}</td>
+          <td>${rec.timeOut || '-'}</td>
+          <td>${rec.hoursWorked !== null ? rec.hoursWorked.toFixed(2) : '-'}</td>
+          <td>${!rec.timeOut ? `<button class="timeout-btn" onclick="markTimeOut(${index})">Mark Time Out</button>` : ''}</td>
+        `;
+        tbody.appendChild(tr);
+
+        if (rec.hoursWorked !== null) {
+          totalWorked += rec.hoursWorked;
+        }
+      });
+
+      totalHoursElem.textContent = totalWorked.toFixed(2);
+    }
+
+    function markTimeOut(index) {
+      const now = new Date();
+      const timeOut = now.toLocaleTimeString();
+
+      const timeInDate = new Date(`01/01/1970 ${attendance[index].timeIn}`);
+      const timeOutDate = new Date(`01/01/1970 ${timeOut}`);
+      let hours = (timeOutDate - timeInDate) / (1000 * 60 * 60);
+      if (hours < 0) hours += 24;
+
+      attendance[index].timeOut = timeOut;
+      attendance[index].hoursWorked = hours;
+
+      localStorage.setItem('attendance', JSON.stringify(attendance));
+      renderTable();
+    }
+
+    function clearAll() {
+      if (confirm("Are you sure you want to clear all attendance records?")) {
+        localStorage.removeItem('attendance');
+        attendance = [];
+        renderTable();
+      }
+    }
+
+    // Initial table render
+    renderTable();
+  </script>
+</body>
+</html>

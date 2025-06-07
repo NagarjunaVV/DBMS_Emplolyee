@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Employees</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header {
+      background: rgba(255, 255, 255, 0.9);
+      color: #2c3e50;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 100%;
+      max-width: 900px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0;
+      color: #2c3e50;
+    }
+
+    .subtitle {
+      font-weight: 400;
+      color: #64748b;
+      margin-top: 8px;
+    }
+
+    .table-container {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin: 0 auto;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    thead th {
+      background-color: rgba(248, 250, 252, 0.8);
+      color: #64748b;
+      padding: 16px 24px;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+      transition: background-color 0.2s ease;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: rgba(248, 250, 252, 0.8);
+    }
+
+    tbody td {
+      padding: 16px 24px;
+      color: #334155;
+      font-weight: 500;
+    }
+
+    .employee-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: rgba(226, 232, 240, 0.7);
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .employee-name {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .employee-email {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .status-active {
+      background-color: rgba(236, 253, 245, 0.8);
+      color: #059669;
+    }
+    
+    .status-on-leave {
+      background-color: rgba(255, 251, 235, 0.8);
+      color: #d97706;
+    }
+    
+    .status-inactive {
+      background-color: rgba(254, 226, 226, 0.8);
+      color: #dc2626;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .status-active .status-dot {
+      background-color: #059669;
+    }
+
+    .status-on-leave .status-dot {
+      background-color: #d97706;
+    }
+
+    .status-inactive .status-dot {
+      background-color: #dc2626;
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      thead th,
+      tbody td {
+        padding: 12px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" style="display: flex; flex-direction: column; align-items: center;">
+    <div class="header" style="width: 100%; max-width: 900px;">
+      <h1>Employee Directory</h1>
+      <div class="subtitle" id="dept-name">Dynamically update to employee's department name</div>
+    </div>
+    
+    <div class="table-container" style="margin: 0 auto; width: 100%; max-width: 900px;">
+      <table>
+        <thead>
+          <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Date Of Birth</th>
+            <th>Join Date</th>
+            <th>Email</th>
+            <th>Phone No</th>
+            <th>Position</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="employee-tbody">
+          <!-- Employee data will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', async function() {
+  // Get employee_id from localStorage (set at login)
+  const employee_id = localStorage.getItem('employee_id');
+  if (!employee_id) {
+    document.getElementById('dept-name').textContent = "Employee not found. Please login again.";
+    return;
+  }
+
+  try {
+    // Fetch employee details from backend
+    const response = await fetch(`/api/employee/${employee_id}`);
+    const emp = await response.json();
+
+    if (emp && emp.employee_id) {
+      // Update department name in subtitle
+      document.getElementById('dept-name').textContent = `Department: ${emp.department_name}`;
+
+      // Fill table with employee details
+      const tbody = document.getElementById('employee-tbody');
+      tbody.innerHTML = `
+        <tr>
+          <td>${emp.first_name}</td>
+          <td>${emp.last_name}</td>
+          <td>${emp.date_of_birth ? emp.date_of_birth.split('T')[0] : ''}</td>
+          <td>${emp.hire_date ? emp.hire_date.split('T')[0] : ''}</td>
+          <td>${emp.email}</td>
+          <td>${emp.phone_number}</td>
+          <td>${emp.position}</td>
+          <td>${emp.status}</td>
+        </tr>
+      `;
+    } else {
+      document.getElementById('dept-name').textContent = "Employee details not found.";
+      document.getElementById('employee-tbody').innerHTML = `<tr><td colspan="8" style="color:red;">No data found.</td></tr>`;
+    }
+  } catch (err) {
+    document.getElementById('dept-name').textContent = "Failed to load employee details.";
+    document.getElementById('employee-tbody').innerHTML = `<tr><td colspan="8" style="color:red;">Failed to load data</td></tr>`;
+  }
+});
+  </script>
+</body>
+</html>

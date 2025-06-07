@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Records</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4a6bff;
+      --secondary: #6a11cb;
+      --text-dark: #2d3748;
+      --text-medium: #4a5568;
+      --text-light: #718096;
+      --border-light: #e2e8f0;
+      --bg-white: rgba(255, 255, 255, 0.95);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: 
+        linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+        url('https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    /* Modern Header Style */
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .page-title {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: white;
+      margin: 0;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      position: relative;
+      display: inline-block;
+      padding-bottom: 15px;
+    }
+
+    .page-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 2px;
+    }
+
+    .page-subtitle {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-top: 15px;
+      font-weight: 400;
+    }
+
+    /* Modern Table Design */
+    .table-container {
+      background: var(--bg-white);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.95rem;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    thead th {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 16px 24px;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+
+    thead th:first-child {
+      border-top-left-radius: 12px;
+    }
+
+    thead th:last-child {
+      border-top-right-radius: 12px;
+    }
+
+    tbody tr {
+      transition: background-color 0.2s ease;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: rgba(248, 250, 252, 0.7);
+    }
+
+    tbody tr:hover {
+      background-color: rgba(236, 240, 255, 0.7);
+    }
+
+    tbody td {
+      padding: 18px 24px;
+      color: var(--text-dark);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    /* Column spacing */
+    tbody td:not(:last-child) {
+      border-right: 15px solid transparent;
+    }
+
+    /* Status Badges */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .status-present {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: #059669;
+    }
+
+    .status-absent {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+    }
+
+    .status-late {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .status-present .status-dot {
+      background-color: #059669;
+    }
+
+    .status-absent .status-dot {
+      background-color: #dc2626;
+    }
+
+    .status-late .status-dot {
+      background-color: #d97706;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        margin: 30px auto;
+        padding: 0 15px;
+      }
+
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .page-subtitle {
+        font-size: 1rem;
+      }
+
+      thead th,
+      tbody td {
+        padding: 12px 15px;
+        font-size: 0.85rem;
+      }
+
+      tbody td:not(:last-child) {
+        border-right: 8px solid transparent;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page-title {
+        font-size: 1.8rem;
+      }
+
+      .table-container {
+        border-radius: 8px;
+      }
+
+      thead th {
+        font-size: 0.75rem;
+        padding: 10px 12px;
+      }
+
+      tbody td {
+        padding: 10px 12px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">Attendance Records</h1>
+      <p class="page-subtitle">Daily employee attendance tracking</p>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Attendance ID</th>
+            <th>Employee ID</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Hours Worked</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Data rows would be inserted here dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

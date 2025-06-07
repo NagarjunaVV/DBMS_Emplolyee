@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Employee</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: url('https://images.unsplash.com/photo-1591696205602-2f950c417cb9?auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .overlay {
+      background-color: rgba(255, 255, 255, 0.7); /* light transparent overlay */
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #005f73;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      transition: border 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #0a9396;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #0a9396;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background: #007f85;
+      transform: scale(1.03);
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="container">
+      <h1>Add New Employee</h1>
+      <form id="addEmployeeForm" autocomplete="off">
+        <input type="hidden" id="department_id" name="department_id" />
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" name="fname" id="fname" required pattern="^[A-Za-z\s]+$" title="Only alphabets and spaces allowed" />
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" name="lname" id="lname" required pattern="^[A-Za-z\s]+$" title="Only alphabets and spaces allowed" />
+        </div>
+        <div class="form-group">
+          <label>Date of Birth</label>
+          <input type="date" name="dob" id="dob" required />
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" name="phone" id="phone" pattern="[0-9]{10}" required />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" name="email" id="email" required />
+        </div>
+        <div class="form-group">
+          <label>Base Salary</label>
+          <input type="number" name="salary" id="salary" required />
+        </div>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const managerDeptId = localStorage.getItem('department_id');
+    if (!managerDeptId) {
+        alert('Manager department not found. Please login again.');
+        window.location.href = '/login.html';
+        return;
+    }
+    document.getElementById('department_id').value = managerDeptId;
+});
+
+document.getElementById("addEmployeeForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const department_id = document.getElementById("department_id").value;
+    const fname = document.getElementById("fname").value.trim();
+    const lname = document.getElementById("lname").value.trim();
+    const dob = document.getElementById("dob").value;
+    const phone = document.getElementById("phone").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const salary = document.getElementById("salary").value.trim();
+
+    // Client-side validation for alphabets
+    const alphaRegex = /^[A-Za-z\s]+$/;
+    if (!alphaRegex.test(fname) || !alphaRegex.test(lname)) {
+      alert("First Name and Last Name should contain only alphabets and spaces.");
+      return;
+    }
+
+    const data = {
+      first_name: fname,
+      last_name: lname,
+      date_of_birth: dob,
+      phone_number: phone,
+      email: email,
+      salary: salary,
+      department_id: department_id
+    };
+
+    try {
+      const response = await fetch('/api/addemployee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (result.success) {
+        alert("Employee added successfully!");
+        document.getElementById("addEmployeeForm").reset();
+      } else {
+        alert(result.error || "Failed to add employee.");
+      }
+    } catch (err) {
+      alert("Server error. Please try again.");
+    }
+});
+  </script>
+</body>
+</html>

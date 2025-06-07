@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Company Login</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
+      min-height: 100vh;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.6);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-box {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1.5px solid #ccc;
+    }
+
+    input:focus, select:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #005ecb;
+    }
+
+    .register-link {
+      display: none;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .register-link a {
+      color: #007bff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="login-box">
+      <h2>Login to Company Portal</h2>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password" required />
+        </div>
+        <div class="form-group">
+          <label>Position</label>
+          <select name="role" id="roleSelect" required>
+            <option value="">Select Role</option>
+            <option value="employee">Employee</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+        <button type="submit">Login</button>
+      </form>
+      <div class="register-link" id="registerManager">
+        <span>New manager? <a href="registermanager.html">Register here</a></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const roleSelect = document.getElementById("roleSelect");
+    const registerManager = document.getElementById("registerManager");
+
+    roleSelect.addEventListener("change", function() {
+      if (this.value === "manager") {
+        registerManager.style.display = "block";
+      } else {
+        registerManager.style.display = "none";
+      }
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      const email = this.email.value;
+      const password = this.password.value;
+      const role = this.role.value;
+
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, role })
+        });
+        const result = await response.json();
+        if (result.success && result.role === "manager" && result.department_id) {
+            localStorage.setItem('department_id', result.department_id);
+            window.location.href = "afterlogin.html";
+          } else if (result.success && result.role === "employee") {
+            localStorage.setItem('employee_id', result.user_id); // This line is required!
+            window.location.href = "loginemployee.html";
+          } else {
+          alert(result.error || "Enter valid credentials");
+        }
+      } catch (err) {
+        alert("Server error. Please try again.");
+      }
+    });
+  </script>
+</body>
+</html>

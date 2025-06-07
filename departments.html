@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Departments</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* Background image with overlay */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: 
+        linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+        url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #eee;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+
+    /* Container */
+    .container {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+      width: 90%;
+      max-width: 900px;
+      padding: 40px 30px;
+      color: #f0f0f0;
+    }
+
+    /* NEW Heading style - Gradient text with animated underline */
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 40px;
+      background: linear-gradient(90deg, #ff6a00, #ee0979, #ff6a00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      letter-spacing: 0.12em;
+      cursor: default;
+    }
+
+    /* Animated underline */
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #ff6a00, #ee0979, #ff6a00);
+      animation: underlineSlide 2.5s ease-in-out infinite;
+    }
+
+    @keyframes underlineSlide {
+      0%, 100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    /* Table styles: modern, card-like rows */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 20px;
+      font-size: 1rem;
+      color: #222;
+      background: transparent;
+    }
+
+    thead tr th {
+      text-align: left;
+      padding: 12px 18px;
+      font-weight: 700;
+      color: #ff6a00;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 1.1rem;
+      border-bottom: 2px solid #ff6a00;
+      background: transparent;
+    }
+
+    tbody tr {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+      display: table-row;
+    }
+
+    tbody tr:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 14px 40px rgba(255, 106, 0, 0.7);
+    }
+
+    tbody td {
+      padding: 18px;
+      vertical-align: middle;
+      font-weight: 600;
+      border-radius: 14px;
+      background: transparent;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      thead tr th,
+      tbody td {
+        padding: 14px 10px;
+        font-size: 0.9rem;
+      }
+
+      table {
+        border-spacing: 0 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Departments Table</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Department ID</th>
+          <th>Department Name</th>
+          <th>Location</th>
+          <th>Number of Employees</th>
+        </tr>
+      </thead>
+      <tbody id="departments-tbody">
+        <!-- Will be filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', async function() {
+  try {
+    const response = await fetch('/api/departments-with-count');
+    const departments = await response.json();
+    const tbody = document.getElementById('departments-tbody');
+    tbody.innerHTML = '';
+    departments.forEach(dep => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${dep.department_id}</td>
+        <td>${dep.department_name}</td>
+        <td>${dep.location}</td>
+        <td>${dep.num_employees}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    document.getElementById('departments-tbody').innerHTML = 
+      `<tr><td colspan="4" style="color:red;">Failed to load departments</td></tr>`;
+  }
+});
+</script>
+</body>
+</html>
