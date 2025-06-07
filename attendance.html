@@ -135,119 +135,80 @@
   <div class="container">
     <h1>Mark Your Attendance</h1>
     <form id="attendance-form">
-      <input type="text" id="fname" placeholder="First Name" required>
-      <input type="text" id="lname" placeholder="Last Name" required>
-      <input type="email" id="email" placeholder="Email ID" required>
-      <button type="submit">Mark Attendance</button>
-      <button type="button" class="clear-btn" onclick="clearAll()">Clear All Records</button>
+      <input type="text" id="fname" placeholder="First Name" readonly>
+      <input type="text" id="lname" placeholder="Last Name" readonly>
+      <input type="email" id="email" placeholder="Email ID" readonly>
+      <button type="button" id="mark-timein">Mark Time In</button>
+      <button type="button" id="mark-timeout">Mark Time Out</button>
     </form>
-
-    <h2>Attendance Records</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Date</th>
-          <th>Time In</th>
-          <th>Time Out</th>
-          <th>Hours Worked</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="records-body"></tbody>
-    </table>
-
-    
+    <div id="attendance-status"></div>
   </div>
 
   <script>
-    const form = document.getElementById('attendance-form');
-    const tbody = document.getElementById('records-body');
-    const totalHoursElem = document.getElementById('total-hours');
+  document.addEventListener('DOMContentLoaded', async function() {
+    const employee_id = localStorage.getItem('employee_id');
+    if (!employee_id) {
+      alert("Please login as employee first.");
+      window.location.href = "login.html";
+      return;
+    }
 
-    let attendance = JSON.parse(localStorage.getItem('attendance')) || [];
+    // Fetch employee details
+    const empRes = await fetch(`/api/employee/${employee_id}`);
+    const emp = await empRes.json();
+    document.getElementById('fname').value = emp.first_name || '';
+    document.getElementById('lname').value = emp.last_name || '';
+    document.getElementById('email').value = emp.email || '';
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const fname = document.getElementById('fname').value.trim();
-      const lname = document.getElementById('lname').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const now = new Date();
-
-      const alreadyCheckedIn = attendance.some(rec => rec.email === email && rec.date === now.toLocaleDateString() && rec.timeOut === null);
-      if (alreadyCheckedIn) {
-        alert("You already marked attendance and haven't marked Time Out yet for today!");
-        return;
-      }
-
-      const record = {
-        fname,
-        lname,
-        email,
-        date: now.toLocaleDateString(),
-        timeIn: now.toLocaleTimeString(),
-        timeOut: null,
-        hoursWorked: null
-      };
-
-      attendance.push(record);
-      localStorage.setItem('attendance', JSON.stringify(attendance));
-      form.reset();
-      renderTable();
-    });
-
-    function renderTable() {
-      tbody.innerHTML = '';
-      let totalWorked = 0;
-
-      attendance.forEach((rec, index) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${rec.fname} ${rec.lname}</td>
-          <td>${rec.email}</td>
-          <td>${rec.date}</td>
-          <td>${rec.timeIn}</td>
-          <td>${rec.timeOut || '-'}</td>
-          <td>${rec.hoursWorked !== null ? rec.hoursWorked.toFixed(2) : '-'}</td>
-          <td>${!rec.timeOut ? `<button class="timeout-btn" onclick="markTimeOut(${index})">Mark Time Out</button>` : ''}</td>
-        `;
-        tbody.appendChild(tr);
-
-        if (rec.hoursWorked !== null) {
-          totalWorked += rec.hoursWorked;
+    // Fetch today's attendance
+    async function updateStatus() {
+      const attRes = await fetch(`/api/attendance/today/${employee_id}`);
+      const att = await attRes.json();
+      let status = '';
+      if (att && att.check_in) {
+        status += `Time In: ${att.check_in}`;
+        if (att.check_out) {
+          status += ` | Time Out: ${att.check_out} | Hours Worked: ${att.hours_worked ? att.hours_worked.toFixed(2) : '-'}`
+        } else {
+          status += " | Time Out: Not marked yet";
         }
-      });
-
-      totalHoursElem.textContent = totalWorked.toFixed(2);
-    }
-
-    function markTimeOut(index) {
-      const now = new Date();
-      const timeOut = now.toLocaleTimeString();
-
-      const timeInDate = new Date(`01/01/1970 ${attendance[index].timeIn}`);
-      const timeOutDate = new Date(`01/01/1970 ${timeOut}`);
-      let hours = (timeOutDate - timeInDate) / (1000 * 60 * 60);
-      if (hours < 0) hours += 24;
-
-      attendance[index].timeOut = timeOut;
-      attendance[index].hoursWorked = hours;
-
-      localStorage.setItem('attendance', JSON.stringify(attendance));
-      renderTable();
-    }
-
-    function clearAll() {
-      if (confirm("Are you sure you want to clear all attendance records?")) {
-        localStorage.removeItem('attendance');
-        attendance = [];
-        renderTable();
+      } else {
+        status = "No attendance marked today.";
       }
+      document.getElementById('attendance-status').textContent = status;
     }
+    updateStatus();
 
-    // Initial table render
-    renderTable();
+    document.getElementById('mark-timein').onclick = async function() {
+      const res = await fetch('/api/attendance/timein', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employee_id })
+      });
+      const result = await res.json();
+      if (result.success) {
+        alert("Time In marked!");
+        updateStatus();
+      } else {
+        alert(result.error || "Failed to mark Time In.");
+      }
+    };
+
+    document.getElementById('mark-timeout').onclick = async function() {
+      const res = await fetch('/api/attendance/timeout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employee_id })
+      });
+      const result = await res.json();
+      if (result.success) {
+        alert("Time Out marked!");
+        updateStatus();
+      } else {
+        alert(result.error || "Failed to mark Time Out.");
+      }
+    };
+  });
   </script>
 </body>
 </html>

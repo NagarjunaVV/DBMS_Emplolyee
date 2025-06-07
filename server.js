@@ -70,15 +70,14 @@ app.post('/api/registermanager', async (req, res) => {
     }
 
     // Generate manager_id
-    const [lastManager] = await pool.promise().query(
-      'SELECT manager_id FROM managers ORDER BY manager_id DESC LIMIT 1'
+    const [rows] = await pool.promise().query(
+      "SELECT MAX(CAST(SUBSTRING(manager_id, 3) AS UNSIGNED)) AS max_id FROM managers"
     );
-
-    let managerId = 'MG1';
-    if (lastManager.length > 0) {
-      const lastNum = parseInt(lastManager[0].manager_id.slice(2)) + 1;
-      managerId = `MG${lastNum}`;
+    let managerNum = 1;
+    if (rows.length > 0 && rows[0].max_id !== null) {
+      managerNum = rows[0].max_id + 1;
     }
+    const managerId = `MG${managerNum}`;
 
     // Start transaction
     const connection = await pool.promise().getConnection();
@@ -286,11 +285,13 @@ app.post('/api/addemployee', async (req, res) => {
       return res.status(400).json({ error: "Invalid department ID" });
     }
 
-    // Generate new employee_id
-    const [lastEmp] = await pool.promise().query('SELECT employee_id FROM employees ORDER BY employee_id DESC LIMIT 1');
+    // Generate new employee_id (find max numeric part)
+    const [rows] = await pool.promise().query(
+      "SELECT MAX(CAST(SUBSTRING(employee_id, 3) AS UNSIGNED)) AS max_id FROM employees"
+    );
     let empNum = 1;
-    if (lastEmp.length > 0) {
-      empNum = parseInt(lastEmp[0].employee_id.replace(/\D/g, '')) + 1;
+    if (rows.length > 0 && rows[0].max_id !== null) {
+      empNum = rows[0].max_id + 1;
     }
     const employee_id = `EM${empNum}`;
 
@@ -351,6 +352,90 @@ app.get('/api/employee/:employee_id', (req, res) => {
   });
 });
 
+// Mark Time In
+app.post('/api/attendance/timein', async (req, res) => {
+  const { employee_id } = req.body;
+  if (!employee_id) return res.status(400).json({ error: "Employee ID required" });
+
+  // Check if already marked in today
+  const [existing] = await pool.promise().query(
+    "SELECT * FROM attendance WHERE employee_id = ? AND date = CURDATE()",
+    [employee_id]
+  );
+  if (existing.length > 0) {
+    return res.status(400).json({ error: "Already marked Time In for today" });
+  }
+
+  // Generate attendance_id
+  const [rows] = await pool.promise().query(
+    "SELECT MAX(CAST(SUBSTRING(attendance_id, 3) AS UNSIGNED)) AS max_id FROM attendance"
+  );
+  let attNum = 1;
+  if (rows.length > 0 && rows[0].max_id !== null) {
+    attNum = rows[0].max_id + 1;
+  }
+  const attendance_id = `AT${attNum}`;
+
+  await pool.promise().query(
+    "INSERT INTO attendance (attendance_id, employee_id, date, check_in, status) VALUES (?, ?, CURDATE(), CURTIME(), 'present')",
+    [attendance_id, employee_id]
+  );
+  res.json({ success: true });
+});
+
+// Mark Time Out
+app.post('/api/attendance/timeout', async (req, res) => {
+  const { employee_id } = req.body;
+  if (!employee_id) return res.status(400).json({ error: "Employee ID required" });
+
+  // Validate employee exists
+  const [emp] = await pool.promise().query(
+    "SELECT * FROM employees WHERE employee_id = ?",
+    [employee_id]
+  );
+  if (emp.length === 0) {
+    return res.status(400).json({ error: "Invalid employee ID" });
+  }
+
+  // Find today's attendance
+  const [rows] = await pool.promise().query(
+    "SELECT * FROM attendance WHERE employee_id = ? AND date = CURDATE()",
+    [employee_id]
+  );
+  if (rows.length === 0) {
+    return res.status(400).json({ error: "No Time In record for today" });
+  }
+  if (rows[0].check_out) {
+    return res.status(400).json({ error: "Already marked Time Out for today" });
+  }
+
+  // Calculate hours worked
+  const checkIn = rows[0].check_in; // "HH:MM:SS"
+  const now = new Date();
+  const [h, m, s] = checkIn.split(':').map(Number);
+  const checkInDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, s);
+  let hoursWorked = (now - checkInDate) / (1000 * 60 * 60);
+  if (hoursWorked < 0) hoursWorked += 24;
+  hoursWorked = Math.round(hoursWorked * 100) / 100;
+
+  await pool.promise().query(
+    "UPDATE attendance SET check_out = CURTIME(), hours_worked = ? WHERE attendance_id = ?",
+    [hoursWorked, rows[0].attendance_id]
+  );
+  res.json({ success: true, hoursWorked });
+});
+
+// Get today's attendance for employee
+app.get('/api/attendance/today/:employee_id', async (req, res) => {
+  const { employee_id } = req.params;
+  const [rows] = await pool.promise().query(
+    "SELECT * FROM attendance WHERE employee_id = ? AND date = CURDATE()",
+    [employee_id]
+  );
+  res.json(rows[0] || {});
+});
+
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
