@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Salary Payment & Records</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a0ca3;
+      --accent: #f72585;
+      --success: #4cc9f0;
+      --warning: #f8961e;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+        url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1500&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: var(--light);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+
+    .header {
+      padding: 30px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #fff, #f72585);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .payment-form {
+      padding: 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--light);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--light);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .status-options {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .status-option {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .status-option.selected {
+      border-color: var(--accent);
+      background-color: rgba(247, 37, 133, 0.1);
+    }
+
+    .status-option.paid {
+      background-color: rgba(76, 201, 240, 0.1);
+      color: var(--success);
+    }
+
+    .status-option.unpaid {
+      background-color: rgba(248, 150, 30, 0.1);
+      color: var(--warning);
+    }
+
+    .form-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-accent {
+      background-color: var(--accent);
+      color: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      color: var(--light);
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+    }
+
+    th {
+      background-color: rgba(67, 97, 238, 0.8);
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .status-paid {
+      color: #4cc9f0;
+      font-weight: 600;
+    }
+
+    .status-unpaid {
+      color: #f8961e;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .payment-form {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+
+      .status-options {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Payment Form -->
+  <div class="container">
+    <div class="header">
+      <h1>Salary Payment</h1>
+      <p>Process employee salary payments</p>
+    </div>
+
+    <form class="payment-form" id="salaryForm">
+      <div class="form-group">
+        <label for="employeeId">Employee ID</label>
+        <input type="text" id="employeeId" required>
+      </div>
+
+      <div class="form-group">
+        <label for="salaryId">Salary ID</label>
+        <input type="text" id="salaryId" required>
+      </div>
+
+      <div class="form-group">
+        <label for="salaryAmount">Salary Amount ($)</label>
+        <input type="number" id="salaryAmount" min="0" step="0.01" required>
+      </div>
+
+      <div class="form-group">
+        <label for="paymentAmount">Paying Amount ($)</label>
+        <input type="number" id="paymentAmount" min="0" step="0.01" required>
+      </div>
+
+      <div class="form-group" style="grid-column: 1 / -1">
+        <label>Payment Status</label>
+        <div class="status-options">
+          <div class="status-option paid" onclick="selectStatus('Paid', this)">
+            <i class="fas fa-check-circle"></i>
+            <div>Paid</div>
+          </div>
+          <div class="status-option unpaid" onclick="selectStatus('Unpaid', this)">
+            <i class="fas fa-times-circle"></i>
+            <div>Unpaid</div>
+          </div>
+        </div>
+        <input type="hidden" id="paymentStatus" required>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Process Payment</button>
+        <button type="reset" class="btn btn-accent">Reset</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Salary Records Table -->
+  <div class="container" id="viewContainer" style="display: block;">
+    <h1 style="text-align: center; margin-top: 30px;">Salary Records</h1>
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Salary ID</th>
+          <th>Employee ID</th>
+          <th>Salary Amount</th>
+          <th>Paying Amount</th>
+          <th>Payment Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- JavaScript will insert rows here -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add this script to connect salaryinput.html to backend and MySQL -->
+  <script>
+function selectStatus(status, element) {
+  document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('selected'));
+  element.classList.add('selected');
+  document.getElementById('paymentStatus').value = status;
+}
+
+// Load salary payments from backend and display in table
+async function loadSalaryPayments() {
+  const tbody = document.querySelector('#dataTable tbody');
+  tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+  try {
+    const res = await fetch('/api/salarypayments');
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:red;">No salary records found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    data.forEach(row => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${row.salary_id}</td>
+          <td>${row.employee_id}</td>
+          <td>${row.salary_amount}</td>
+          <td>${row.paid_amount}</td>
+          <td class="status-${row.status ? row.status.toLowerCase() : ''}">${row.status || ''}</td>
+        </tr>
+      `;
+    });
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:red;">Error loading data.</td></tr>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Set default status to Paid
+  selectStatus('Paid', document.querySelector('.status-option.paid'));
+  loadSalaryPayments();
+
+  // Handle form submission
+  document.getElementById('salaryForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    // Get form values
+    const salaryId = document.getElementById('salaryId').value;
+    const employeeId = document.getElementById('employeeId').value;
+    const salaryAmount = document.getElementById('salaryAmount').value;
+    const paymentAmount = document.getElementById('paymentAmount').value;
+    const paymentStatus = document.getElementById('paymentStatus').value;
+
+    // Send to backend
+    try {
+      const res = await fetch('/api/salarypayments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          salary_id: salaryId,
+          employee_id: employeeId,
+          salary_amount: salaryAmount,
+          paid_amount: paymentAmount,
+          status: paymentStatus
+        })
+      });
+      const result = await res.json();
+      if (result.success) {
+        loadSalaryPayments();
+        this.reset();
+        selectStatus('Paid', document.querySelector('.status-option.paid'));
+      } else {
+        alert(result.error || "Failed to add salary record.");
+      }
+    } catch (err) {
+      alert("Server error.");
+    }
+  });
+});
+  </script>
+</body>
+</html>

@@ -24,6 +24,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      -webkit-backdrop-filter: blur(4px);
       backdrop-filter: blur(4px);
     }
 
@@ -100,19 +101,19 @@
         </div>
         <div class="form-group">
           <label>Date of Birth</label>
-          <input type="date" name="dob" id="dob" required />
+          <input type="date" name="dob" id="dob" required title="Please enter your date of birth" placeholder="YYYY-MM-DD" />
         </div>
         <div class="form-group">
           <label>Phone Number</label>
-          <input type="tel" name="phone" id="phone" pattern="[0-9]{10}" required />
+          <input type="tel" name="phone" id="phone" pattern="[0-9]{10}" required title="Please enter a 10-digit phone number" placeholder="Enter 10-digit phone number" />
         </div>
         <div class="form-group">
           <label>Email Address</label>
-          <input type="email" name="email" id="email" required />
+          <input type="email" name="email" id="email" required title="Please enter a valid email address" placeholder="Enter your email address" />
         </div>
         <div class="form-group">
           <label>Base Salary</label>
-          <input type="number" name="salary" id="salary" required />
+          <input type="number" name="salary" id="salary" required title="Please enter the base salary" placeholder="Enter base salary" />
         </div>
         <button type="submit">Submit</button>
       </form>

@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4bb543;
+            --danger-color: #ff3333;
+            --warning-color: #ffcc00;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #4895ef;
+            --secondary-color: #4361ee;
+            --accent-color: #3f37c9;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            transition: var(--transition);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            grid-template-rows: 80px 1fr;
+            height: 100vh;
+            transition: var(--transition);
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: var(--box-shadow);
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header h1 i {
+            margin-right: 10px;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .sidebar {
+            background-color: var(--light-color);
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1.5rem 0;
+            overflow-y: auto;
+            transition: var(--transition);
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            padding: 0.8rem 2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .sidebar li:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar li.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .sidebar li i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .content {
+            padding: 2rem;
+            overflow-y: auto;
+            background-color: var(--light-color);
+            transition: var(--transition);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box i {
+            margin-right: 10px;
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            color: var(--dark-color);
+        }
+
+        .filters {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .filters select {
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            outline: none;
+        }
+
+        .filters input[type="date"] {
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            outline: none;
+        }
+
+        .filters button {
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filters button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            background-color: var(--light-color);
+            transition: var(--transition);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--dark-color);
+            transition: var(--transition);
+            padding: 0.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-icon.edit {
+            color: var(--accent-color);
+        }
+
+        .btn-icon.delete {
+            color: var(--danger-color);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .pagination button:disabled {
+            background-color: rgba(0, 0, 0, 0.1);
+            cursor: not-allowed;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background-color: var(--secondary-color);
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--light-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius);
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: transparent;
+            color: var(--dark-color);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-danger {
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius);
+            border: none;
+            background-color: var(--danger-color);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .btn-danger:hover {
+            background-color: #cc0000;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--light-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-color);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            background-color: var(--success-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--box-shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .chart-container {
+            margin-top: 2rem;
+            background-color: var(--light-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .report-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-summary {
+            margin-top: 2rem;
+            background-color: var(--light-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .report-summary h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .report-summary .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .report-summary .summary-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            padding-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 80px auto 1fr;
+            }
+
+            .sidebar {
+                grid-row: 2;
+                border-right: none;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar ul {
+                display: flex;
+                overflow-x: auto;
+            }
+
+            .sidebar li {
+                white-space: nowrap;
+            }
+
+            .content {
+                grid-row: 3;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+
+            .filters {
+                flex-wrap: wrap;
+            }
+
+            .form-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-money-bill-wave"></i> Payroll Management</h1>
+            <div class="theme-toggle">
+                <i class="fas fa-moon"></i>
+                <label class="switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="slider round"></span>
+                </label>
+                <i class="fas fa-sun"></i>
+            </div>
+        </header>
+
+        <nav class="sidebar">
+            <ul>
+                <li class="active" data-tab="view-tab"><i class="fas fa-eye"></i> View Payroll</li>
+                <li data-tab="insert-tab"><i class="fas fa-plus-circle"></i> Add Payroll</li>
+                <li data-tab="reports-tab"><i class="fas fa-chart-bar"></i> Reports</li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <!-- View Payroll Tab -->
+            <div id="view-tab" class="tab-content active">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search payroll...">
+                    </div>
+                    <div class="filters">
+                        <select id="dateFilter">
+                            <option value="all">All Dates</option>
+                            <option value="thisMonth">This Month</option>
+                            <option value="lastMonth">Last Month</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                        <div id="customDateRange" class="hidden">
+                            <input type="date" id="startDate">
+                            <span>to</span>
+                            <input type="date" id="endDate">
+                            <button id="applyDateRange">Apply</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="payrollTable">
+                        <thead>
+                            <tr>
+                                <th>Payroll ID</th>
+                                <th>Employee ID</th>
+                                <th>Salary</th>
+                                <th>Bonus</th>
+                                <th>Deduction</th>
+                                <th>Total Pay</th>
+                                <th>Pay Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payrollTableBody">
+                            <!-- Data will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button id="prevPage"><i class="fas fa-chevron-left"></i></button>
+                    <span id="pageInfo">Page 1 of 1</span>
+                    <button id="nextPage"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Insert Payroll Tab -->
+            <div id="insert-tab" class="tab-content">
+                <h2><i class="fas fa-plus-circle"></i> Add New Payroll Record</h2>
+                <form id="payrollForm" class="form-container">
+                    <div class="form-group">
+                        <label for="payrollId">Payroll ID</label>
+                        <input type="text" id="payrollId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="employeeId">Employee ID</label>
+                        <input type="text" id="employeeId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="salary">Salary</label>
+                        <input type="number" id="salary" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bonus">Bonus</label>
+                        <input type="number" id="bonus" step="0.01" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="deduction">Deduction</label>
+                        <input type="number" id="deduction" step="0.01" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="payDate">Pay Date</label>
+                        <input type="date" id="payDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="totalPay">Total Pay</label>
+                        <input type="number" id="totalPay" step="0.01" readonly>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+                        <button type="reset" class="btn-secondary"><i class="fas fa-undo"></i> Reset</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="reports-tab" class="tab-content">
+                <h2><i class="fas fa-chart-bar"></i> Payroll Reports</h2>
+                <div class="report-filters">
+                    <select id="reportType">
+                        <option value="monthly">Monthly Summary</option>
+                        <option value="employee">By Employee</option>
+                        <option value="yearly">Yearly Overview</option>
+                    </select>
+                    <button id="generateReport" class="btn-primary"><i class="fas fa-chart-pie"></i> Generate Report</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="payrollChart"></canvas>
+                </div>
+                <div id="reportSummary" class="report-summary">
+                    <!-- Report summary will be displayed here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Edit Payroll Record</h2>
+            <form id="editForm" class="form-container">
+                <input type="hidden" id="editPayrollId">
+                <div class="form-group">
+                    <label for="editEmployeeId">Employee ID</label>
+                    <input type="text" id="editEmployeeId" required>
+                </div>
+                <div class="form-group">
+                    <label for="editSalary">Salary</label>
+                    <input type="number" id="editSalary" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="editBonus">Bonus</label>
+                    <input type="number" id="editBonus" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="editDeduction">Deduction</label>
+                    <input type="number" id="editDeduction" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="editPayDate">Pay Date</label>
+                    <input type="date" id="editPayDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="editTotalPay">Total Pay</label>
+                    <input type="number" id="editTotalPay" step="0.01" readonly>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Update</button>
+                    <button type="button" id="deleteRecord" class="btn-danger"><i class="fas fa-trash"></i> Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Notification -->
+    <div id="successNotification" class="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationMessage">Operation completed successfully!</span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme Toggle
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            
+            // Check for saved theme preference or use preferred color scheme
+            const savedTheme = localStorage.getItem('theme') || 
+                            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            
+            if (savedTheme === 'dark') {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.checked = true;
+            }
+            
+            themeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+            
+            // Tab Navigation
+            const tabs = document.querySelectorAll('.sidebar li');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // If switching to reports tab, generate default report
+                    if (tabId === 'reports-tab') {
+                        generateReport('monthly');
+                    }
+                });
+            });
+            
+            // Sample Data - In a real app, this would come from a database
+            let payrollData = [
+                {
+                    payroll_id: 'PY001',
+                    employee_id: 'EMP001',
+                    salary: 5000.00,
+                    bonus: 500.00,
+                    deduction: 200.00,
+                    total_pay: 5300.00,
+                    pay_date: '2023-05-01'
+                },
+                {
+                    payroll_id: 'PY002',
+                    employee_id: 'EMP002',
+                    salary: 6000.00,
+                    bonus: 600.00,
+                    deduction: 250.00,
+                    total_pay: 6350.00,
+                    pay_date: '2023-05-01'
+                },
+                {
+                    payroll_id: 'PY003',
+                    employee_id: 'EMP003',
+                    salary: 4500.00,
+                    bonus: 300.00,
+                    deduction: 150.00,
+                    total_pay: 4650.00,
+                    pay_date: '2023-05-15'
+                },
+                {
+                    payroll_id: 'PY004',
+                    employee_id: 'EMP001',
+                    salary: 5000.00,
+                    bonus: 400.00,
+                    deduction: 200.00,
+                    total_pay: 5200.00,
+                    pay_date: '2023-06-01'
+                },
+                {
+                    payroll_id: 'PY005',
+                    employee_id: 'EMP002',
+                    salary: 6000.00,
+                    bonus: 700.00,
+                    deduction: 250.00,
+                    total_pay: 6450.00,
+                    pay_date: '2023-06-01'
+                },
+            ];
+            
+            // Initialize Data Table
+            function renderPayrollTable(data = payrollData) {
+                const tableBody = document.getElementById('payrollTableBody');
+                tableBody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="8" class="no-data">No payroll records found</td>`;
+                    tableBody.appendChild(row);
+                    return;
+                }
+                
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.payroll_id}</td>
+                        <td>${item.employee_id}</td>
+                        <td>$${item.salary.toFixed(2)}</td>
+                        <td>$${item.bonus.toFixed(2)}</td>
+                        <td>$${item.deduction.toFixed(2)}</td>
+                        <td>$${item.total_pay.toFixed(2)}</td>
+                        <td>${formatDate(item.pay_date)}</td>
+                        <td class="actions">
+                            <button class="btn-icon edit" data-id="${item.payroll_id}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon delete" data-id="${item.payroll_id}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // Add event listeners to edit/delete buttons
+                document.querySelectorAll('.btn-icon.edit').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const payrollId = this.getAttribute('data-id');
+                        editPayroll(payrollId);
+                    });
+                });
+                
+                document.querySelectorAll('.btn-icon.delete').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const payrollId = this.getAttribute('data-id');
+                        deletePayroll(payrollId);
+                    });
+                });
+            }
+            
+            // Format date for display
+            function formatDate(dateString) {
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString(undefined, options);
+            }
+            
+            // Calculate total pay
+            function calculateTotalPay() {
+                const salary = parseFloat(document.getElementById('salary').value) || 0;
+                const bonus = parseFloat(document.getElementById('bonus').value) || 0;
+                const deduction = parseFloat(document.getElementById('deduction').value) || 0;
+                const totalPay = salary + bonus - deduction;
+                document.getElementById('totalPay').value = totalPay.toFixed(2);
+            }
+            
+            // Same for edit form
+            function calculateEditTotalPay() {
+                const salary = parseFloat(document.getElementById('editSalary').value) || 0;
+                const bonus = parseFloat(document.getElementById('editBonus').value) || 0;
+                const deduction = parseFloat(document.getElementById('editDeduction').value) || 0;
+                const totalPay = salary + bonus - deduction;
+                document.getElementById('editTotalPay').value = totalPay.toFixed(2);
+            }
+            
+            // Set up event listeners for auto-calculation
+            document.getElementById('salary').addEventListener('input', calculateTotalPay);
+            document.getElementById('bonus').addEventListener('input', calculateTotalPay);
+            document.getElementById('deduction').addEventListener('input', calculateTotalPay);
+            
+            document.getElementById('editSalary').addEventListener('input', calculateEditTotalPay);
+            document.getElementById('editBonus').addEventListener('input', calculateEditTotalPay);
+            document.getElementById('editDeduction').addEventListener('input', calculateEditTotalPay);
+            
+            // Form Submission - Add new payroll
+            document.getElementById('payrollForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const payrollId = document.getElementById('payrollId').value;
+                const employeeId = document.getElementById('employeeId').value;
+                const salary = parseFloat(document.getElementById('salary').value);
+                const bonus = parseFloat(document.getElementById('bonus').value) || 0;
+                const deduction = parseFloat(document.getElementById('deduction').value) || 0;
+                const totalPay = parseFloat(document.getElementById('totalPay').value);
+                const payDate = document.getElementById('payDate').value;
+                
+                // Check if payroll ID already exists
+                if (payrollData.some(item => item.payroll_id === payrollId)) {
+                    showNotification('Payroll ID already exists!', 'error');
+                    return;
+                }
+                
+                // Add new payroll record
+                const newPayroll = {
+                    payroll_id: payrollId,
+                    employee_id: employeeId,
+                    salary: salary,
+                    bonus: bonus,
+                    deduction: deduction,
+                    total_pay: totalPay,
+                    pay_date: payDate
+                };
+                
+                payrollData.push(newPayroll);
+                renderPayrollTable();
+                
+                // Reset form
+                this.reset();
+                document.getElementById('totalPay').value = '0.00';
+                
+                showNotification('Payroll record added successfully!');
+                
+                // Switch to view tab
+                document.querySelector('[data-tab="view-tab"]').click();
+            });
+            
+            // Edit Payroll
+            function editPayroll(payrollId) {
+                const payroll = payrollData.find(item => item.payroll_id === payrollId);
+                if (!payroll) return;
+                
+                document.getElementById('editPayrollId').value = payroll.payroll_id;
+                document.getElementById('editEmployeeId').value = payroll.employee_id;
+                document.getElementById('editSalary').value = payroll.salary;
+                document.getElementById('editBonus').value = payroll.bonus;
+                document.getElementById('editDeduction').value = payroll.deduction;
+                document.getElementById('editTotalPay').value = payroll.total_pay;
+                document.getElementById('editPayDate').value = payroll.pay_date;
+                
+                // Open modal
+                document.getElementById('editModal').style.display = 'flex';
+            }
+            
+            // Edit Form Submission
+            document.getElementById('editForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const payrollId = document.getElementById('editPayrollId').value;
+                const employeeId = document.getElementById('editEmployeeId').value;
+                const salary = parseFloat(document.getElementById('editSalary').value);
+                const bonus = parseFloat(document.getElementById('editBonus').value) || 0;
+                const deduction = parseFloat(document.getElementById('editDeduction').value) || 0;
+                const totalPay = parseFloat(document.getElementById('editTotalPay').value);
+                const payDate = document.getElementById('editPayDate').value;
+                
+                // Update payroll record
+                const index = payrollData.findIndex(item => item.payroll_id === payrollId);
+                if (index !== -1) {
+                    payrollData[index] = {
+                        payroll_id: payrollId,
+                        employee_id: employeeId,
+                        salary: salary,
+                        bonus: bonus,
+                        deduction: deduction,
+                        total_pay: totalPay,
+                        pay_date: payDate
+                    };
+                    
+                    renderPayrollTable();
+                    closeModal();
+                    showNotification('Payroll record updated successfully!');
+                }
+            });
+            
+            // Delete Payroll
+            function deletePayroll(payrollId) {
+                if (confirm('Are you sure you want to delete this payroll record?')) {
+                    payrollData = payrollData.filter(item => item.payroll_id !== payrollId);
+                    renderPayrollTable();
+                    showNotification('Payroll record deleted successfully!');
+                }
+            }
+            
+            // Delete button in modal
+            document.getElementById('deleteRecord').addEventListener('click', function() {
+                const payrollId = document.getElementById('editPayrollId').value;
+                closeModal();
+                deletePayroll(payrollId);
+            });
+            
+            // Modal Close
+            function closeModal() {
+                document.getElementById('editModal').style.display = 'none';
+            }
+            
+            document.querySelector('.close-modal').addEventListener('click', closeModal);
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === document.getElementById('editModal')) {
+                    closeModal();
+                }
+            });
+            
+            // Search Functionality
+            document.getElementById('searchInput').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const filteredData = payrollData.filter(item => 
+                    item.payroll_id.toLowerCase().includes(searchTerm) ||
+                    item.employee_id.toLowerCase().includes(searchTerm) ||
+                    item.total_pay.toString().includes(searchTerm) ||
+                    formatDate(item.pay_date).toLowerCase().includes(searchTerm)
+                );
+                renderPayrollTable(filteredData);
+            });
+            
+            // Date Filter
+            document.getElementById('dateFilter').addEventListener('change', function() {
+                const filterValue = this.value;
+                let filteredData = [];
+                
+                if (filterValue === 'all') {
+                    filteredData = payrollData;
+                } else if (filterValue === 'thisMonth') {
+                    const currentDate = new Date();
+                    const currentMonth = currentDate.getMonth();
+                    const currentYear = currentDate.getFullYear();
+                    
+                    filteredData = payrollData.filter(item => {
+                        const itemDate = new Date(item.pay_date);
+                        return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+                    });
+                } else if (filterValue === 'lastMonth') {
+                    const currentDate = new Date();
+                    currentDate.setMonth(currentDate.getMonth() - 1);
+                    const lastMonth = currentDate.getMonth();
+                    const lastYear = currentDate.getFullYear();
+                    
+                    filteredData = payrollData.filter(item => {
+                        const itemDate = new Date(item.pay_date);
+                        return itemDate.getMonth() === lastMonth && itemDate.getFullYear() === lastYear;
+                    });
+                } else if (filterValue === 'custom') {
+                    document.getElementById('customDateRange').classList.remove('hidden');
+                    return;
+                }
+                
+                renderPayrollTable(filteredData);
+            });
+            
+            // Apply Custom Date Range
+            document.getElementById('applyDateRange').addEventListener('click', function() {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                if (!startDate || !endDate) {
+                    alert('Please select both start and end dates');
+                    return;
+                }
+                
+                const filteredData = payrollData.filter(item => {
+                    return item.pay_date >= startDate && item.pay_date <= endDate;
+                });
+
+                renderPayrollTable(filteredData);
+            });
+            // Generate Report
+            document.getElementById('generateReport').addEventListener('click', function() {
+                const reportType = document.getElementById('reportType').value;
+                generateReport(reportType);
+            });
+
+            // Generate Report Function
+            function generateReport(reportType) {
+                let reportData = [];
+                if (reportType === 'summary') {
+                    // Generate summary report
+                    reportData = payrollData.map(item => {
+                        return {
+                            employee_id: item.employee_id,
+                            total_pay: item.total_pay
+                        };
+                    });
+                } else if (reportType === 'detailed') {
+                    // Generate detailed report
+                    reportData = payrollData;
+                }
+
+                // Here you can implement the logic to download or display the report
+                console.log('Generating ' + reportType + ' report:', reportData);
+            }
+            // Show Notification
+            function showNotification(message) {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.innerText = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+
+            // Initial render
+            renderPayrollTable(payrollData);
+            document.getElementById('editTotalPay').value = '0.00';     
+
+            // Set up initial total pay calculation 
+            calculateTotalPay();
+            calculateEditTotalPay();
+        });
+    </script>
+</body>
+</html>

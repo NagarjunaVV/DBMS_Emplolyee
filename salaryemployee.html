@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Salary History</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --accent-color: #f72585;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --success-color: #4cc9f0;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: 
+        linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+        url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: var(--light-color);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 60px auto;
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(90deg, #f72585, #4cc9f0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      display: inline-block;
+    }
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 60%;
+      height: 4px;
+      background: linear-gradient(90deg, #f72585, #4cc9f0);
+      border-radius: 2px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 20px;
+      font-size: 1rem;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    thead th {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      text-align: left;
+      padding: 18px 25px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    thead th:first-child {
+      border-top-left-radius: 12px;
+    }
+
+    thead th:last-child {
+      border-top-right-radius: 12px;
+    }
+
+    tbody tr {
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    td {
+      padding: 16px 25px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--light-color);
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status.paid {
+      background-color: rgba(76, 201, 240, 0.2);
+      color: #4cc9f0;
+    }
+
+    .status.pending {
+      background-color: rgba(247, 37, 133, 0.2);
+      color: #f72585;
+    }
+
+    .salary-amount {
+      font-weight: 600;
+      color: #4cc9f0;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-right: 10px;
+    }
+
+    .action-btn:hover {
+      color: var(--accent-color);
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 30px 15px;
+        padding: 20px;
+      }
+      
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tbody tr {
+        margin-bottom: 20px;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        padding: 10px;
+      }
+
+      td {
+        padding: 10px 15px 10px 50%;
+        position: relative;
+        border: none;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        text-transform: uppercase;
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Salary History</h1>
+    </div>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Payment Id</th>
+          <th>Employee Id</th>
+          <th>Salary</th>
+          <th>Benefits</th>
+          <th>Deductions</th>
+          <th>Net Salary</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+
+  <script>
+async function loadEmployeePayments() {
+  const employeeId = localStorage.getItem('employee_id'); // Set this on login!
+  if (!employeeId) {
+    alert("No employee ID found. Please log in.");
+    return;
+  }
+
+  const table = document.querySelector('table');
+  let tbody = table.querySelector('tbody');
+  if (!tbody) {
+    tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+  }
+  tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+
+  try {
+    const res = await fetch(`/api/totalpayments/${employeeId}`);
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:red;">No records found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    data.forEach(row => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${row.payment_id || ''}</td>
+          <td>${row.employee_id || ''}</td>
+          <td>${row.salary !== undefined ? parseFloat(row.salary).toFixed(2) : ''}</td>
+          <td>${row.benefits !== undefined ? parseFloat(row.benefits).toFixed(2) : ''}</td>
+          <td>${row.deductions !== undefined ? parseFloat(row.deductions).toFixed(2) : ''}</td>
+          <td>${row.net_salary !== undefined ? parseFloat(row.net_salary).toFixed(2) : ''}</td>
+        </tr>
+      `;
+    });
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:red;">Error loading data.</td></tr>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadEmployeePayments);
+</script>
+</body>
+</html>

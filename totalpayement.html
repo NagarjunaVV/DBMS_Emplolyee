@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employee Total Payment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 50px 20px;
+      display: flex;
+      justify-content: center;
+      background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), 
+        url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 1000px;
+      overflow-x: auto;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      background: linear-gradient(to right, #007cf0, #00dfd8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    th, td {
+      padding: 14px 18px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    @media (max-width: 768px) {
+      table {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Employee Total Payment</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Payment ID</th>
+          <th>Employee ID</th>
+          <th>Salary</th>
+          <th>Benefits</th>
+          <th>Deductions</th>
+          <th>Net Salary</th>
+        </tr>
+      </thead>
+      <!-- Data rows go here -->
+    </table>
+  </div>
+  <!-- Add this script before </body> to fetch and display total payment data -->
+  <script>
+async function loadTotalPayments() {
+  const table = document.querySelector('table');
+  let tbody = table.querySelector('tbody');
+  if (!tbody) {
+    tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+  }
+  tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+
+  try {
+    const res = await fetch('/api/totalpayments');
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:red;">No records found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = '';
+    data.forEach(row => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${row.payment_id || ''}</td>
+          <td>${row.employee_id || ''}</td>
+          <td>${row.salary !== undefined ? parseFloat(row.salary).toFixed(2) : ''}</td>
+          <td>${row.benefits !== undefined ? parseFloat(row.benefits).toFixed(2) : ''}</td>
+          <td>${row.deductions !== undefined ? parseFloat(row.deductions).toFixed(2) : ''}</td>
+          <td>${row.net_salary !== undefined ? parseFloat(row.net_salary).toFixed(2) : ''}</td>
+        </tr>
+      `;
+    });
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:red;">Error loading data.</td></tr>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadTotalPayments);
+</script>
+</body>
+</html>

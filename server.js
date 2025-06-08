@@ -376,6 +376,7 @@ app.post('/api/attendance/timein', async (req, res) => {
   }
   const attendance_id = `AT${attNum}`;
 
+  // Insert into attendance table
   await pool.promise().query(
     "INSERT INTO attendance (attendance_id, employee_id, date, check_in, status) VALUES (?, ?, CURDATE(), CURTIME(), 'present')",
     [attendance_id, employee_id]
@@ -418,11 +419,12 @@ app.post('/api/attendance/timeout', async (req, res) => {
   if (hoursWorked < 0) hoursWorked += 24;
   hoursWorked = Math.round(hoursWorked * 100) / 100;
 
+  // Update attendance table
   await pool.promise().query(
     "UPDATE attendance SET check_out = CURTIME(), hours_worked = ? WHERE attendance_id = ?",
     [hoursWorked, rows[0].attendance_id]
   );
-  res.json({ success: true, hoursWorked });
+  res.json({ success: true });
 });
 
 // Get today's attendance for employee
@@ -433,6 +435,180 @@ app.get('/api/attendance/today/:employee_id', async (req, res) => {
     [employee_id]
   );
   res.json(rows[0] || {});
+});
+
+// Get all attendance records
+app.get('/api/attendance/all', async (req, res) => {
+  const [rows] = await pool.promise().query(
+    "SELECT attendance_id, employee_id, status, date, hours_worked FROM attendance ORDER BY date DESC"
+  );
+  res.json(rows);
+});
+
+// Get salary history for an employee
+app.get('/api/salaryhistory/:employee_id', async (req, res) => {
+  const { employee_id } = req.params;
+  const [rows] = await pool.promise().query(
+    "SELECT * FROM salary_history WHERE employee_id = ? ORDER BY effective_date DESC",
+    [employee_id]
+  );
+  res.json(rows);
+});
+
+// Get salary history for employees
+app.get('/api/salaryhistory', async (req, res) => {
+  try {
+    const [rows] = await pool.promise().query(`
+      SELECT
+        history_id,
+        employee_id,
+        month,
+        salary,
+        status
+      FROM salary_history
+      ORDER BY month DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add salary history entry
+app.post('/api/salaryhistory', async (req, res) => {
+  const { employee_id, old_salary, new_salary, total_pay, effective_date } = req.body;
+  try {
+    // Generate new history_id
+    const [rows] = await pool.promise().query(
+      "SELECT MAX(CAST(SUBSTRING(history_id, 3) AS UNSIGNED)) AS max_id FROM salary_history"
+    );
+    let histNum = 1;
+    if (rows.length > 0 && rows[0].max_id !== null) {
+      histNum = rows[0].max_id + 1;
+    }
+    const history_id = `SH${histNum}`;
+    await pool.promise().query(
+      "INSERT INTO salary_history (history_id, employee_id, old_salary, new_salary, total_pay, effective_date) VALUES (?, ?, ?, ?, ?, ?)",
+      [history_id, employee_id, old_salary, new_salary, total_pay, effective_date]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all salary payments
+app.get('/api/salarypayments', async (req, res) => {
+  const [rows] = await pool.promise().query(
+    "SELECT salary_id, employee_id, salary_amount, paid_amount, status FROM salary_payments ORDER BY salary_id DESC"
+  );
+  res.json(rows);
+});
+
+// Add a salary payment
+app.post('/api/salarypayments', async (req, res) => {
+  const { salary_id, employee_id, salary_amount, paid_amount, status } = req.body;
+  try {
+    await pool.promise().query(
+      "INSERT INTO salary_payments (salary_id, employee_id, salary_amount, paid_amount, status) VALUES (?, ?, ?, ?, ?)",
+      [salary_id, employee_id, salary_amount, paid_amount, status]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all deductions
+app.get('/api/deductions', async (req, res) => {
+  const [rows] = await pool.promise().query(
+    "SELECT deduction_id, employee_id, deduction_type, amount, deduction_date FROM deductions ORDER BY deduction_date DESC"
+  );
+  res.json(rows);
+});
+
+// Add a deduction
+app.post('/api/deductions', async (req, res) => {
+  const { deduction_id, employee_id, deduction_type, amount, deduction_date } = req.body;
+  try {
+    await pool.promise().query(
+      "INSERT INTO deductions (deduction_id, employee_id, deduction_type, amount, deduction_date) VALUES (?, ?, ?, ?, ?)",
+      [deduction_id, employee_id, deduction_type, amount, deduction_date]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all benefits
+app.get('/api/benefits', async (req, res) => {
+  const [rows] = await pool.promise().query(
+    "SELECT benefit_id, employee_id, salary_id, benefit_type, benefit_amount, effective_date FROM benefits ORDER BY effective_date DESC"
+  );
+  res.json(rows);
+});
+
+// Add a benefit
+app.post('/api/benefits', async (req, res) => {
+  const { benefit_id, employee_id, salary_id, benefit_type, benefit_amount, effective_date } = req.body;
+  try {
+    await pool.promise().query(
+      "INSERT INTO benefits (benefit_id, employee_id, salary_id, benefit_type, benefit_amount, effective_date) VALUES (?, ?, ?, ?, ?, ?)",
+      [benefit_id, employee_id, salary_id, benefit_type, benefit_amount, effective_date]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get total payment info for each employee
+app.get('/api/totalpayments', async (req, res) => {
+  try {
+    const [rows] = await pool.promise().query(`
+      SELECT
+        sp.salary_id AS payment_id,
+        sp.employee_id,
+        sp.salary_amount AS salary,
+        IFNULL(SUM(b.benefit_amount), 0) AS benefits,
+        IFNULL(SUM(d.amount), 0) AS deductions,
+        (sp.salary_amount + IFNULL(SUM(b.benefit_amount), 0) - IFNULL(SUM(d.amount), 0)) AS net_salary
+      FROM salary_payments sp
+      LEFT JOIN benefits b ON sp.salary_id = b.salary_id
+      LEFT JOIN deductions d ON sp.employee_id = d.employee_id
+      GROUP BY sp.salary_id, sp.employee_id, sp.salary_amount
+      ORDER BY sp.salary_id DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get total payment info for a specific employee
+app.get('/api/totalpayments/:employee_id', async (req, res) => {
+  const { employee_id } = req.params;
+  try {
+    const [rows] = await pool.promise().query(`
+      SELECT
+        sp.salary_id AS payment_id,
+        sp.employee_id,
+        sp.salary_amount AS salary,
+        IFNULL(SUM(b.benefit_amount), 0) AS benefits,
+        IFNULL(SUM(d.amount), 0) AS deductions,
+        (sp.salary_amount + IFNULL(SUM(b.benefit_amount), 0) - IFNULL(SUM(d.amount), 0)) AS net_salary
+      FROM salary_payments sp
+      LEFT JOIN benefits b ON sp.salary_id = b.salary_id
+      LEFT JOIN deductions d ON sp.employee_id = d.employee_id
+      WHERE sp.employee_id = ?
+      GROUP BY sp.salary_id, sp.employee_id, sp.salary_amount
+      ORDER BY sp.salary_id DESC
+    `, [employee_id]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Start the server

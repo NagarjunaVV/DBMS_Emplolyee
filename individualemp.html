@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Employees</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -31,10 +32,13 @@
       border-radius: 12px;
       margin-bottom: 30px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      -webkit-backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
       backdrop-filter: blur(5px);
       border: 1px solid rgba(255, 255, 255, 0.2);
       width: 100%;
       max-width: 900px;
+      margin: 0 auto;
     }
 
     h1 {
@@ -188,13 +192,13 @@
   </style>
 </head>
 <body>
-  <div class="container" style="display: flex; flex-direction: column; align-items: center;">
-    <div class="header" style="width: 100%; max-width: 900px;">
+    <div class="header">
+    <div class="header">
       <h1>Employee Directory</h1>
       <div class="subtitle" id="dept-name">Dynamically update to employee's department name</div>
     </div>
     
-    <div class="table-container" style="margin: 0 auto; width: 100%; max-width: 900px;">
+    <div class="table-container">
       <table>
         <thead>
           <tr>

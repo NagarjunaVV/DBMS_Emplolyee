@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employee Benefits System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 40px;
+      background: linear-gradient(to right, #1f4037, #99f2c8);
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #00c9ff, #92fe9d);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 30px;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #ffd166;
+    }
+
+    input, select {
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    select {
+      background-image: linear-gradient(to right, #7f00ff, #e100ff);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    select option {
+      background-color: #222;
+      color: #fff;
+    }
+
+    .form-actions {
+      grid-column: 1 / -1;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 12px 32px;
+      background-image: linear-gradient(to right, #6a11cb, #2575fc);
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      color: #fff;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+    }
+
+    th {
+      background: linear-gradient(to right, #00b4db, #0083b0);
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .amount-positive {
+      color: #06d6a0;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      form {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Employee Benefits Entry</h1>
+    <form id="benefitsForm">
+      <div class="form-group">
+        <label for="benefitId">Benefit ID</label>
+        <input type="text" id="benefitId" required>
+      </div>
+      <div class="form-group">
+        <label for="employeeId">Employee ID</label>
+        <input type="text" id="employeeId" required>
+      </div>
+      <div class="form-group">
+        <label for="salaryId">Salary ID</label>
+        <input type="text" id="salaryId" required>
+      </div>
+      <div class="form-group">
+        <label for="benefitType">Benefit Type</label>
+        <select id="benefitType" required>
+          <option value="" disabled selected>Select benefit type</option>
+          <option value="Health Insurance">Health Insurance</option>
+          <option value="Pension">Pension</option>
+          <option value="Bonus">Bonus</option>
+          <option value="Transport">Transport</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="benefitAmount">Benefit Amount ($)</label>
+        <input type="number" id="benefitAmount" min="0" step="0.01" required>
+      </div>
+      <div class="form-group">
+        <label for="effectiveDate">Effective Date</label>
+        <input type="date" id="effectiveDate" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit">Add Benefit</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="container">
+    <h1>Benefits Record</h1>
+    <table id="benefitsTable">
+      <thead>
+        <tr>
+          <th>Benefit ID</th>
+          <th>Employee ID</th>
+          <th>Salary ID</th>
+          <th>Benefit Type</th>
+          <th>Amount ($)</th>
+          <th>Effective Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dynamic entries will appear here -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+async function loadBenefits() {
+  const table = document.querySelector('#benefitsTable tbody');
+  table.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+  try {
+    const res = await fetch('/api/benefits');
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      table.innerHTML = '<tr><td colspan="6" style="color:red;">No benefits found.</td></tr>';
+      return;
+    }
+    table.innerHTML = '';
+    data.forEach(row => {
+      table.innerHTML += `
+        <tr>
+          <td>${row.benefit_id}</td>
+          <td>${row.employee_id}</td>
+          <td>${row.salary_id}</td>
+          <td>${row.benefit_type}</td>
+          <td class="amount-positive">${parseFloat(row.benefit_amount).toFixed(2)}</td>
+          <td>${row.effective_date ? row.effective_date.split('T')[0] : ''}</td>
+        </tr>
+      `;
+    });
+  } catch (err) {
+    table.innerHTML = '<tr><td colspan="6" style="color:red;">Error loading data.</td></tr>';
+  }
+}
+
+document.getElementById('benefitsForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const benefit_id = document.getElementById('benefitId').value.trim();
+  const employee_id = document.getElementById('employeeId').value.trim();
+  const salary_id = document.getElementById('salaryId').value.trim();
+  const benefit_type = document.getElementById('benefitType').value;
+  const benefit_amount = parseFloat(document.getElementById('benefitAmount').value).toFixed(2);
+  const effective_date = document.getElementById('effectiveDate').value;
+
+  try {
+    const res = await fetch('/api/benefits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        benefit_id,
+        employee_id,
+        salary_id,
+        benefit_type,
+        benefit_amount,
+        effective_date
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      this.reset();
+      loadBenefits();
+    } else {
+      alert(result.error || "Failed to add benefit.");
+    }
+  } catch (err) {
+    alert("Server error.");
+  }
+});
+
+// Load benefits on page load
+document.addEventListener('DOMContentLoaded', loadBenefits);
+  </script>
+
+</body>
+</html>

@@ -77,6 +77,7 @@
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       overflow: hidden;
+      -webkit-backdrop-filter: blur(8px);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
@@ -246,11 +247,45 @@
             <th>Hours Worked</th>
           </tr>
         </thead>
-        <tbody>
-          <!-- Data rows would be inserted here dynamically -->
+        <tbody id="attendance-tbody">
+          <!-- Data rows will be inserted here dynamically -->
         </tbody>
       </table>
     </div>
   </div>
+  <script>
+document.addEventListener('DOMContentLoaded', async function() {
+  // Fetch all attendance records from backend
+  try {
+    const response = await fetch('/api/attendance/all');
+    const records = await response.json();
+    const tbody = document.getElementById('attendance-tbody');
+    tbody.innerHTML = '';
+    if (records.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:red;">No attendance records found.</td></tr>';
+      return;
+    }
+    records.forEach(rec => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${rec.attendance_id}</td>
+        <td>${rec.employee_id}</td>
+        <td>
+          <span class="status status-${rec.status}">
+            <span class="status-dot"></span>
+            ${rec.status.charAt(0).toUpperCase() + rec.status.slice(1)}
+          </span>
+        </td>
+        <td>${rec.date ? rec.date.split('T')[0] : ''}</td>
+        <td>${rec.hours_worked !== null ? Number(rec.hours_worked).toFixed(2) : '-'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    document.getElementById('attendance-tbody').innerHTML =
+      '<tr><td colspan="5" style="color:red;">Failed to load attendance records.</td></tr>';
+  }
+});
+</script>
 </body>
 </html>
